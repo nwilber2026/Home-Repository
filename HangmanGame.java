@@ -13,6 +13,9 @@ import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 
 /**
@@ -29,6 +32,34 @@ public class HangmanGame
 {
     //SETUP SCANNER
     static Scanner input = new Scanner(System.in);
+
+
+    //--------------------------------------------------------------------------
+    //SOUND PLAYER
+    //Call this whenever you want a sound to play.
+    //Pass in the filename of the .wav file you want (e.g. "correct.wav")
+    //Place all .wav files in the same folder as this .java file
+    static void playSound(String soundFile)
+    {
+        //delete later      
+        System.out.println("Looking for sound in: " + new File(soundFile).getAbsolutePath());
+        
+        try
+        {
+            AudioInputStream audioIn = AudioSystem.getAudioInputStream(new File(soundFile));
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioIn);
+            clip.start();
+        
+            // Wait for the sound to finish before moving on
+            Thread.sleep(clip.getMicrosecondLength() / 10000000);
+        }
+        catch (Exception e)
+        {
+            //If the sound file is missing or broken, continue — don't crash the game
+            System.out.println("  [Sound error: " + soundFile + " not found]");
+        }
+    }
 
 
     //--------------------------------------------------------------------------
@@ -383,6 +414,11 @@ public class HangmanGame
                     // Reveal ALL occurrences of that letter in the display word
                     revealLetter(guessedLetter, targetWord, displayWord);
                     System.out.println("  Great guess! '" + guessedLetter + "' is in the word.");
+
+                    //----------------------------------------------------------
+                    // SOUND: Correct letter guess
+                    playSound("correct_letter.wav");
+                    //----------------------------------------------------------
                 } 
                 
                 else // Wrong guess = add to the wrong list
@@ -390,6 +426,11 @@ public class HangmanGame
                     wrongGuesses++;
                     wrongLetters.add(String.valueOf(guessedLetter));
                     System.out.println("  Sorry, '" + guessedLetter + "' is not in the word.");
+
+                    //----------------------------------------------------------
+                    // SOUND: Wrong letter guess
+                    playSound("wrong_letter.wav");
+                    //----------------------------------------------------------
                 }
                 
                 pressEnterToContinue();
@@ -408,6 +449,11 @@ public class HangmanGame
                     for (int i = 0; i < targetWord.length(); i++) 
                     { displayWord[i] = targetWord.charAt(i); }
                     System.out.println("CORRECT! You guessed the word!");
+
+                    //----------------------------------------------------------
+                    // SOUND: Correct word guess
+                    playSound("correct_word.wav");
+                    //----------------------------------------------------------
                 } 
                 
                 //Wrong Guess
@@ -415,6 +461,11 @@ public class HangmanGame
                 {                                    
                     wrongGuesses++;
                     System.out.println("Wrong word! You lost a guess.");
+
+                    //----------------------------------------------------------
+                    // SOUND: Wrong word guess
+                    playSound("wrong_word.wav");
+                    //----------------------------------------------------------
                 }
 
                 pressEnterToContinue();
@@ -541,7 +592,7 @@ public class HangmanGame
     //--------------------------------------------------------------------------
     //WIN SCREEN
     static void showWinScreen(String word, String theme) 
-    {
+    {       
         System.out.println("=======================================================");
         System.out.println("                  YOU WIN!  :D");
         System.out.println("=======================================================");
@@ -563,6 +614,11 @@ public class HangmanGame
     //LOSE SCREEN
     static void showLoseScreen(String word, String theme) 
     {        
+        //----------------------------------------------------------------------
+        // SOUND: Player loses the round
+        playSound("lose.wav");
+        //----------------------------------------------------------------------
+
         System.out.println("=======================================================");
         System.out.println("                  GAME OVER  :(");
         System.out.println("=======================================================");
